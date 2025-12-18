@@ -46,7 +46,7 @@
     <LinkerArg Include="-sASYNCIFY=1" />
 
     <!-- Export runtime methods for interop -->
-    <LinkerArg Include="-sEXPORTED_RUNTIME_METHODS=cwrap,ccall,UTF8ToString,stringToUTF8" />
+    <LinkerArg Include="-sEXPORTED_RUNTIME_METHODS=cwrap,ccall,UTF8ToString,stringToUTF8,HEAP8,HEAP16,HEAP32,HEAPU8,HEAPU16,HEAPU32,HEAPF32,HEAPF64" />
 
     <!-- ES6 module output -->
     <LinkerArg Include="-sEXPORT_ES6=1" />
