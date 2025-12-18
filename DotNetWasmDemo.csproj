@@ -24,13 +24,31 @@
   <!-- NativeAOT-LLVM Compiler Packages -->
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="10.0.0-*" />
-    <PackageReference Include="runtime.$(NETCoreSdkPortableRuntimeIdentifier).Microsoft.DotNet.ILCompiler.LLVM" Version="10.0.0-*" />
+    <PackageReference
+      Include="runtime.$(NETCoreSdkPortableRuntimeIdentifier).Microsoft.DotNet.ILCompiler.LLVM"
+      Version="10.0.0-*" />
   </ItemGroup>
 
   <!-- SDL3 and WebGPU C# Bindings -->
   <ItemGroup>
     <PackageReference Include="WebGPUSharp" Version="0.4.0" />
     <PackageReference Include="SDL3-CS" Version="3.2.14.2" />
+  </ItemGroup>
+
+  <!-- DirectPInvoke for statically linked native libraries -->
+  <ItemGroup>
+    <!-- SDL3 functions are compiled into WASM via -use-port=sdl3 -->
+    <DirectPInvoke Include="libSDL3" />
+    <DirectPInvoke Include="SDL3" />
+    <!-- WebGPU functions from emdawnwebgpu port -->
+    <!-- WebGPU functions from emdawnwebgpu port (include all possible names) -->
+    <DirectPInvoke Include="webgpu" />
+    <DirectPInvoke Include="webgpu_dawn" />
+    <DirectPInvoke Include="wgpu_native" />
+    <!-- Emscripten runtime functions -->
+    <DirectPInvoke Include="emscripten" />
+    <!-- Standard C library functions -->
+    <DirectPInvoke Include="c" />
   </ItemGroup>
 
   <!-- Emscripten Linker Arguments -->
@@ -46,7 +64,8 @@
     <LinkerArg Include="-sASYNCIFY=1" />
 
     <!-- Export runtime methods for interop -->
-    <LinkerArg Include="-sEXPORTED_RUNTIME_METHODS=cwrap,ccall,UTF8ToString,stringToUTF8,HEAP8,HEAP16,HEAP32,HEAPU8,HEAPU16,HEAPU32,HEAPF32,HEAPF64" />
+    <LinkerArg
+      Include="-sEXPORTED_RUNTIME_METHODS=cwrap,ccall,UTF8ToString,stringToUTF8,HEAP8,HEAP16,HEAP32,HEAPU8,HEAPU16,HEAPU32,HEAPF32,HEAPF64" />
 
     <!-- ES6 module output -->
     <LinkerArg Include="-sEXPORT_ES6=1" />
