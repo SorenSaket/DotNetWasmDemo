@@ -70,8 +70,6 @@
 
   <!-- Emscripten Linker Arguments -->
   <ItemGroup>
-        <!-- SDL3 port -->
-    <LinkerArg Include="--closure=1" />
     <!-- SDL3 port -->
     <LinkerArg Include="--use-port=sdl3" />
 
