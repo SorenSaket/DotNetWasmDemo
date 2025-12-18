@@ -29,17 +29,17 @@
       Version="10.0.0-*" />
   </ItemGroup>
 
-  <!-- SDL3 and WebGPU C# Bindings -->
+  <!-- SDL2 and WebGPU C# Bindings -->
   <ItemGroup>
     <PackageReference Include="WebGPUSharp" Version="0.4.0" />
-    <PackageReference Include="SDL3-CS" Version="3.2.14.2" />
+    <PackageReference Include="ppy.SDL2-CS" Version="1.0.741-alpha" />
   </ItemGroup>
 
   <!-- DirectPInvoke for statically linked native libraries -->
   <ItemGroup>
-    <!-- SDL3 functions are compiled into WASM via -use-port=sdl3 -->
-    <DirectPInvoke Include="libSDL3" />
-    <DirectPInvoke Include="SDL3" />
+    <!-- SDL2 functions are compiled into WASM via -sUSE_SDL=2 -->
+    <DirectPInvoke Include="libSDL2" />
+    <DirectPInvoke Include="SDL2" />
     <!-- WebGPU functions from emdawnwebgpu port -->
     <!-- WebGPU functions from emdawnwebgpu port (include all possible names) -->
     <DirectPInvoke Include="webgpu" />
@@ -53,8 +53,8 @@
 
   <!-- Emscripten Linker Arguments -->
   <ItemGroup>
-    <!-- SDL3 port -->
-    <LinkerArg Include="--use-port=sdl3" />
+    <!-- SDL2 (available in Emscripten 3.1.56) -->
+    <LinkerArg Include="-sUSE_SDL=2" />
 
     <!-- WebGPU/Dawn port -->
     <LinkerArg Include="--use-port=emdawnwebgpu" />

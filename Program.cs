@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using SDL3;
+using SDL2;
 using WebGpuSharp;
 using WebGpuSharp.FFI;
 using WebGpuSharp.Marshalling;
@@ -34,14 +34,14 @@ public static class Program
     {
         Console.WriteLine("Starting .NET WASM WebGPU Demo...");
 
-        // Initialize SDL3
+        // Initialize SDL2
         if (!InitializeSDL())
         {
-            Console.WriteLine("Failed to initialize SDL3");
+            Console.WriteLine("Failed to initialize SDL2");
             return -1;
         }
 
-        Console.WriteLine("SDL3 initialized successfully!");
+        Console.WriteLine("SDL2 initialized successfully!");
 
         // Initialize WebGPU
         if (!await InitializeWebGPU())
@@ -84,23 +84,25 @@ public static class Program
     private static bool InitializeSDL()
     {
         // Initialize SDL with video subsystem
-        if (!SDL.Init(SDL.InitFlags.Video))
+        if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
         {
-            Console.WriteLine($"SDL_Init failed: {SDL.GetError()}");
+            Console.WriteLine($"SDL_Init failed: {SDL.SDL_GetError()}");
             return false;
         }
 
         // Create window
-        _window = SDL.CreateWindow(
+        _window = SDL.SDL_CreateWindow(
             "WebGPU Demo - .NET WASM",
+            SDL.SDL_WINDOWPOS_CENTERED,
+            SDL.SDL_WINDOWPOS_CENTERED,
             WINDOW_WIDTH,
             WINDOW_HEIGHT,
-            SDL.WindowFlags.Resizable
+            SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN
         );
 
-        if (_window == 0)
+        if (_window == IntPtr.Zero)
         {
-            Console.WriteLine($"SDL_CreateWindow failed: {SDL.GetError()}");
+            Console.WriteLine($"SDL_CreateWindow failed: {SDL.SDL_GetError()}");
             return false;
         }
 
@@ -408,66 +410,70 @@ fn fs_main(@location(0) color: vec4f) -> @location(0) vec4f {
 
     private static void ProcessEvents()
     {
-        SDL.Event sdlEvent;
-        while (SDL.PollEvent(out sdlEvent))
+        SDL.SDL_Event sdlEvent;
+        while (SDL.SDL_PollEvent(out sdlEvent) != 0)
         {
-            // Use if-else chain instead of switch for enum comparison
-            if (sdlEvent.Type == (uint)SDL.EventType.Quit)
+            switch (sdlEvent.type)
             {
-                _running = false;
-                Console.WriteLine("Quit event received");
-            }
-            else if (sdlEvent.Type == (uint)SDL.EventType.KeyDown)
-            {
-                HandleKeyDown(sdlEvent.Key);
-            }
-            else if (sdlEvent.Type == (uint)SDL.EventType.KeyUp)
-            {
-                HandleKeyUp(sdlEvent.Key);
-            }
-            else if (sdlEvent.Type == (uint)SDL.EventType.MouseMotion)
-            {
-                _mouseX = sdlEvent.Motion.X;
-                _mouseY = sdlEvent.Motion.Y;
-            }
-            else if (sdlEvent.Type == (uint)SDL.EventType.MouseButtonDown)
-            {
-                _mousePressed = true;
-                Console.WriteLine($"Mouse pressed at ({_mouseX}, {_mouseY})");
-            }
-            else if (sdlEvent.Type == (uint)SDL.EventType.MouseButtonUp)
-            {
-                _mousePressed = false;
-                Console.WriteLine($"Mouse released at ({_mouseX}, {_mouseY})");
-            }
-            else if (sdlEvent.Type == (uint)SDL.EventType.WindowResized)
-            {
-                HandleResize(sdlEvent.Window.Data1, sdlEvent.Window.Data2);
+                case SDL.SDL_EventType.SDL_QUIT:
+                    _running = false;
+                    Console.WriteLine("Quit event received");
+                    break;
+
+                case SDL.SDL_EventType.SDL_KEYDOWN:
+                    HandleKeyDown(sdlEvent.key);
+                    break;
+
+                case SDL.SDL_EventType.SDL_KEYUP:
+                    HandleKeyUp(sdlEvent.key);
+                    break;
+
+                case SDL.SDL_EventType.SDL_MOUSEMOTION:
+                    _mouseX = sdlEvent.motion.x;
+                    _mouseY = sdlEvent.motion.y;
+                    break;
+
+                case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                    _mousePressed = true;
+                    Console.WriteLine($"Mouse pressed at ({_mouseX}, {_mouseY})");
+                    break;
+
+                case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
+                    _mousePressed = false;
+                    Console.WriteLine($"Mouse released at ({_mouseX}, {_mouseY})");
+                    break;
+
+                case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                    if (sdlEvent.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
+                    {
+                        HandleResize(sdlEvent.window.data1, sdlEvent.window.data2);
+                    }
+                    break;
             }
         }
     }
 
-    private static void HandleKeyDown(SDL.KeyboardEvent keyEvent)
+    private static void HandleKeyDown(SDL.SDL_KeyboardEvent keyEvent)
     {
-        Console.WriteLine($"Key pressed: {keyEvent.Scancode}");
+        Console.WriteLine($"Key pressed: {keyEvent.keysym.scancode}");
 
         // ESC to quit
-        if (keyEvent.Scancode == SDL.Scancode.Escape)
+        if (keyEvent.keysym.scancode == SDL.SDL_Scancode.SDL_SCANCODE_ESCAPE)
         {
             _running = false;
         }
 
         // Space to reset color
-        if (keyEvent.Scancode == SDL.Scancode.Space)
+        if (keyEvent.keysym.scancode == SDL.SDL_Scancode.SDL_SCANCODE_SPACE)
         {
             _hue = 0.0f;
             Console.WriteLine("Color reset!");
         }
     }
 
-    private static void HandleKeyUp(SDL.KeyboardEvent keyEvent)
+    private static void HandleKeyUp(SDL.SDL_KeyboardEvent keyEvent)
     {
-        Console.WriteLine($"Key released: {keyEvent.Scancode}");
+        Console.WriteLine($"Key released: {keyEvent.keysym.scancode}");
     }
 
     private static void HandleResize(int width, int height)
@@ -596,13 +602,13 @@ fn fs_main(@location(0) color: vec4f) -> @location(0) vec4f {
         _adapter = null;
         _instance = null;
 
-        if (_window != 0)
+        if (_window != IntPtr.Zero)
         {
-            SDL.DestroyWindow(_window);
-            _window = 0;
+            SDL.SDL_DestroyWindow(_window);
+            _window = IntPtr.Zero;
         }
 
-        SDL.Quit();
+        SDL.SDL_Quit();
 
         Console.WriteLine("Cleanup complete!");
     }
