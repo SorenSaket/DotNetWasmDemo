@@ -36,9 +36,9 @@ jobs:
     - name: Build and Publish
       run: dotnet publish -r browser-wasm -c Release
 
-    - name: Fix Module.HEAP32 exports
+   #  - name: Fix Module.HEAP32 exports
       # NativeAOT-LLVM generates code that expects Module.HEAP32 but Emscripten doesn't expose it
-      run: node scripts/fix-heap-exports.js
+    #   run: node scripts/fix-heap-exports.js
 
     - name: Upload WASM artifacts
       uses: actions/upload-artifact@v4
