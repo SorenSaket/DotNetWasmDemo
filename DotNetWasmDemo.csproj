@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- NativeAOT-LLVM Configuration -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <SelfContained>true</SelfContained>
+    <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
+    <UseAppHost>false</UseAppHost>
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!-- Custom defines -->
+    <DefineConstants>$(DefineConstants);BROWSER_WASM</DefineConstants>
+
+    <!-- Suppress platform warnings -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+  <!-- NativeAOT-LLVM Compiler Packages -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="10.0.0-*" />
+    <PackageReference Include="runtime.$(NETCoreSdkPortableRuntimeIdentifier).Microsoft.DotNet.ILCompiler.LLVM" Version="10.0.0-*" />
+  </ItemGroup>
+
+  <!-- SDL3 and WebGPU C# Bindings -->
+  <ItemGroup>
+    <PackageReference Include="WebGPUSharp" Version="0.4.0" />
+    <PackageReference Include="SDL3-CS" Version="3.2.14.2" />
+  </ItemGroup>
+
+  <!-- Emscripten Linker Arguments -->
+  <ItemGroup>
+    <!-- SDL3 port -->
+    <LinkerArg Include="--use-port=sdl3" />
+
+    <!-- WebGPU/Dawn port -->
+    <LinkerArg Include="--use-port=emdawnwebgpu" />
+
+    <!-- Memory and async configuration -->
+    <LinkerArg Include="-sALLOW_MEMORY_GROWTH=1" />
+    <LinkerArg Include="-sASYNCIFY=1" />
+
+    <!-- Export runtime methods for interop -->
+    <LinkerArg Include="-sEXPORTED_RUNTIME_METHODS=cwrap,ccall,UTF8ToString,stringToUTF8" />
+
+    <!-- ES6 module output -->
+    <LinkerArg Include="-sEXPORT_ES6=1" />
+    <LinkerArg Include="-sMODULARIZE=1" />
+
+    <!-- WebGPU support -->
+    <LinkerArg Include="-sUSE_WEBGPU=1" />
+
+    <!-- Full ES2/ES3 for WebGL fallback if needed -->
+    <LinkerArg Include="-sFULL_ES2=1" />
+    <LinkerArg Include="-sFULL_ES3=1" />
+  </ItemGroup>
+
+  <!-- Include HTML template -->
+  <ItemGroup>
+    <Content Include="index.html" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

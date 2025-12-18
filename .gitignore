@@ -1,0 +1,22 @@
+# Build outputs
+bin/
+obj/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# IDE specific
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc

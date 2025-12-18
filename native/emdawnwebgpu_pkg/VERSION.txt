@@ -1,0 +1,2 @@
+Dawn release v20251216.160840 at revision <https://dawn.googlesource.com/dawn/+log/02bbb24c16b47fb17f0eb34a88313a84724a09b9>.
+Built/tested with emsdk release 4.0.20.
