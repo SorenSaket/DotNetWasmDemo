@@ -10,10 +10,12 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Emscripten SDK
+# NativeAOT-LLVM requires Emscripten 3.1.56 - do not change without verifying compatibility
+# See: https://github.com/dotnet/runtimelab/blob/feature/NativeAOT-LLVM/eng/pipelines/runtimelab/install-emscripten.ps1
 WORKDIR /emsdk
 RUN git clone https://github.com/emscripten-core/emsdk.git . && \
-    ./emsdk install latest && \
-    ./emsdk activate latest
+    ./emsdk install 3.1.56 && \
+    ./emsdk activate 3.1.56
 
 # Set up Emscripten environment
 ENV EMSDK=/emsdk
@@ -26,5 +28,5 @@ WORKDIR /src
 # Copy project files
 COPY . .
 
-# Build command
-CMD ["/bin/bash", "-c", "source /emsdk/emsdk_env.sh && dotnet publish -r browser-wasm -c Release"]
+# Build command - also applies HEAP32 fix for NativeAOT-LLVM
+CMD ["/bin/bash", "-c", "source /emsdk/emsdk_env.sh && dotnet publish -r browser-wasm -c Release && node scripts/fix-heap-exports.js"]

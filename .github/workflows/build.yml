@@ -21,9 +21,11 @@ jobs:
         dotnet-quality: 'preview'
     
     - name: Setup Emscripten
+      # NativeAOT-LLVM requires Emscripten 3.1.56 - do not change without verifying compatibility
+      # See: https://github.com/dotnet/runtimelab/blob/feature/NativeAOT-LLVM/eng/pipelines/runtimelab/install-emscripten.ps1
       uses: mymindstorm/setup-emsdk@v14
       with:
-        version: 'latest'
+        version: '3.1.56'
         actions-cache-folder: 'emsdk-cache'
     
     - name: Verify Emscripten
@@ -34,7 +36,12 @@ jobs:
     
     - name: Build and Publish
       run: dotnet publish -r browser-wasm -c Release
-    
+
+    - name: Fix Module.HEAP32 exports
+      # NativeAOT-LLVM generates code that expects Module.HEAP32 but Emscripten doesn't expose it
+      # This patches the generated JS to export HEAP arrays on the Module object
+      run: node scripts/fix-heap-exports.js
+
     - name: Upload WASM artifacts
       uses: actions/upload-artifact@v4
       with:
