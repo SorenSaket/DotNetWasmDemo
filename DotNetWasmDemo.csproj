@@ -52,9 +52,6 @@
     <LinkerArg Include="-sEXPORT_ES6=1" />
     <LinkerArg Include="-sMODULARIZE=1" />
 
-    <!-- WebGPU support -->
-    <LinkerArg Include="-sUSE_WEBGPU=1" />
-
     <!-- Full ES2/ES3 for WebGL fallback if needed -->
     <LinkerArg Include="-sFULL_ES2=1" />
     <LinkerArg Include="-sFULL_ES3=1" />
