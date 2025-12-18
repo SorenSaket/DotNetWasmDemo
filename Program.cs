@@ -67,23 +67,14 @@ public static class Program
 
         Console.WriteLine("[.NET] Render pipeline created successfully!");
         Console.WriteLine("[.NET] Controls: Space = reset color, Mouse click = brighten, ESC = quit");
-
-        // Main loop
-        #if BROWSER_WASM
+        
         // For WASM, we use Emscripten's main loop
         Console.WriteLine("[.NET] About to call emscripten_set_main_loop...");
         EmscriptenSetMainLoop(MainLoop, 60, 1);
         Console.WriteLine("[.NET] emscripten_set_main_loop returned (this should not appear with simulate_infinite_loop=1)");
-        #else
-        // For native, use a simple while loop
-        while (_running)
-        {
-            MainLoop();
-            await Task.Delay(16); // ~60 FPS
-        }
-        #endif
 
-        Cleanup();
+
+        //Cleanup();
         return 0;
     }
 
