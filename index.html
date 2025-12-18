@@ -207,6 +207,9 @@
                     canvas: document.getElementById('canvas'),
                     print: (text) => console.log(text),
                     printErr: (text) => console.error(text),
+                    preRun: [() => {
+                        console.log('[JS] preRun callback fired');
+                    }],
                     onRuntimeInitialized: () => {
                         console.log('[JS] onRuntimeInitialized callback fired');
                         setStatus('Application running');
@@ -214,11 +217,19 @@
                     onAbort: (what) => {
                         console.error('[JS] Module aborted:', what);
                         setStatus(`Aborted: ${what}`, true);
+                    },
+                    locateFile: (path, prefix) => {
+                        console.log('[JS] locateFile:', path);
+                        return prefix + path;
                     }
+                }).then(module => {
+                    console.log('[JS] Module promise resolved');
                 }).catch(err => {
                     // This catch handles the "unwind" exception that emscripten_set_main_loop throws
                     // It's expected behavior, not an error
-                    if (err !== 'unwind') {
+                    if (err === 'unwind') {
+                        console.log('[JS] Main loop started (unwind caught - this is expected)');
+                    } else {
                         console.error('[JS] Module error:', err);
                         setStatus(`Error: ${err}`, true);
                     }

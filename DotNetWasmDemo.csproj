@@ -36,19 +36,27 @@
   </ItemGroup>
 
   <!-- DirectPInvoke for statically linked native libraries -->
+  <!-- DirectPInvoke tells NativeAOT-LLVM to resolve these at compile time, not runtime -->
   <ItemGroup>
-    <!-- SDL3 functions are compiled into WASM via -use-port=sdl3 -->
-    <DirectPInvoke Include="libSDL3" />
+    <!-- SDL3 - try all possible naming variations -->
     <DirectPInvoke Include="SDL3" />
+    <DirectPInvoke Include="libSDL3" />
+    <DirectPInvoke Include="libSDL3.dll" />
+    <DirectPInvoke Include="libSDL3.so" />
+    <DirectPInvoke Include="SDL3.dll" />
+    <!-- Wildcard to match any SDL3 library name -->
+    <DirectPInvoke Include="*SDL3*" />
     <!-- WebGPU functions from emdawnwebgpu port -->
-    <!-- WebGPU functions from emdawnwebgpu port (include all possible names) -->
     <DirectPInvoke Include="webgpu" />
     <DirectPInvoke Include="webgpu_dawn" />
     <DirectPInvoke Include="wgpu_native" />
+    <DirectPInvoke Include="*webgpu*" />
     <!-- Emscripten runtime functions -->
     <DirectPInvoke Include="emscripten" />
+    <DirectPInvoke Include="*emscripten*" />
     <!-- Standard C library functions -->
     <DirectPInvoke Include="c" />
+    <DirectPInvoke Include="libc" />
   </ItemGroup>
 
   <!-- Emscripten Linker Arguments -->
