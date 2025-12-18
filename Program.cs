@@ -30,7 +30,7 @@ public static class Program
     private static Queue? _queue;
     private static RenderPipeline? _pipeline;
 
-    public static async Task<int> Main(string[] args)
+    public static int Main(string[] args)
     {
         Console.WriteLine("[.NET] Main() started");
         Console.WriteLine("[.NET] Starting .NET WASM WebGPU Demo...");
@@ -47,7 +47,7 @@ public static class Program
 
         // Initialize WebGPU
         Console.WriteLine("[.NET] About to call InitializeWebGPU()...");
-        if (!await InitializeWebGPU())
+        if (!InitializeWebGPU().GetAwaiter().GetResult())
         {
             Console.WriteLine("[.NET] Failed to initialize WebGPU");
             Cleanup();
@@ -72,7 +72,7 @@ public static class Program
         #if BROWSER_WASM
         // For WASM, we use Emscripten's main loop
         Console.WriteLine("[.NET] About to call emscripten_set_main_loop...");
-        EmscriptenSetMainLoop(MainLoop, 0, 1);
+        EmscriptenSetMainLoop(MainLoop, 60, 1);
         Console.WriteLine("[.NET] emscripten_set_main_loop returned (this should not appear with simulate_infinite_loop=1)");
         #else
         // For native, use a simple while loop

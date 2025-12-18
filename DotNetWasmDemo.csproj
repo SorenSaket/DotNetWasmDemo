@@ -9,7 +9,6 @@
 
     
     <WasmBuildNative>true</WasmBuildNative>
-    <WasmMainJSPath>main.js</WasmMainJSPath>
     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
 
     <!-- NativeAOT-LLVM Configuration -->
