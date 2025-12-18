@@ -32,42 +32,48 @@ public static class Program
 
     public static async Task<int> Main(string[] args)
     {
-        Console.WriteLine("Starting .NET WASM WebGPU Demo...");
+        Console.WriteLine("[.NET] Main() started");
+        Console.WriteLine("[.NET] Starting .NET WASM WebGPU Demo...");
 
         // Initialize SDL3
+        Console.WriteLine("[.NET] About to call InitializeSDL()...");
         if (!InitializeSDL())
         {
-            Console.WriteLine("Failed to initialize SDL3");
+            Console.WriteLine("[.NET] Failed to initialize SDL3");
             return -1;
         }
 
-        Console.WriteLine("SDL3 initialized successfully!");
+        Console.WriteLine("[.NET] SDL3 initialized successfully!");
 
         // Initialize WebGPU
+        Console.WriteLine("[.NET] About to call InitializeWebGPU()...");
         if (!await InitializeWebGPU())
         {
-            Console.WriteLine("Failed to initialize WebGPU");
+            Console.WriteLine("[.NET] Failed to initialize WebGPU");
             Cleanup();
             return -1;
         }
 
-        Console.WriteLine("WebGPU initialized successfully!");
+        Console.WriteLine("[.NET] WebGPU initialized successfully!");
 
         // Create render pipeline
+        Console.WriteLine("[.NET] About to create render pipeline...");
         if (!CreateRenderPipeline())
         {
-            Console.WriteLine("Failed to create render pipeline");
+            Console.WriteLine("[.NET] Failed to create render pipeline");
             Cleanup();
             return -1;
         }
 
-        Console.WriteLine("Render pipeline created successfully!");
-        Console.WriteLine("Controls: Space = reset color, Mouse click = brighten, ESC = quit");
+        Console.WriteLine("[.NET] Render pipeline created successfully!");
+        Console.WriteLine("[.NET] Controls: Space = reset color, Mouse click = brighten, ESC = quit");
 
         // Main loop
         #if BROWSER_WASM
         // For WASM, we use Emscripten's main loop
+        Console.WriteLine("[.NET] About to call emscripten_set_main_loop...");
         EmscriptenSetMainLoop(MainLoop, 0, 1);
+        Console.WriteLine("[.NET] emscripten_set_main_loop returned (this should not appear with simulate_infinite_loop=1)");
         #else
         // For native, use a simple while loop
         while (_running)
@@ -83,14 +89,17 @@ public static class Program
 
     private static bool InitializeSDL()
     {
+        Console.WriteLine("[.NET] InitializeSDL() - calling SDL.Init...");
         // Initialize SDL with video subsystem
         if (!SDL.Init(SDL.InitFlags.Video))
         {
-            Console.WriteLine($"SDL_Init failed: {SDL.GetError()}");
+            Console.WriteLine($"[.NET] SDL_Init failed: {SDL.GetError()}");
             return false;
         }
+        Console.WriteLine("[.NET] SDL.Init succeeded");
 
         // Create window
+        Console.WriteLine("[.NET] Creating SDL window...");
         _window = SDL.CreateWindow(
             "WebGPU Demo - .NET WASM",
             WINDOW_WIDTH,
@@ -100,35 +109,42 @@ public static class Program
 
         if (_window == 0)
         {
-            Console.WriteLine($"SDL_CreateWindow failed: {SDL.GetError()}");
+            Console.WriteLine($"[.NET] SDL_CreateWindow failed: {SDL.GetError()}");
             return false;
         }
+        Console.WriteLine($"[.NET] SDL window created: {_window}");
 
         return true;
     }
 
     private static async Task<bool> InitializeWebGPU()
     {
+        Console.WriteLine("[.NET] InitializeWebGPU() started");
         try
         {
             // Create WebGPU instance
+            Console.WriteLine("[.NET] Creating WebGPU instance...");
             var instanceDesc = new InstanceDescriptor();
             _instance = WebGPU.CreateInstance(instanceDesc);
             if (_instance == null)
             {
-                Console.WriteLine("Failed to create WebGPU instance");
+                Console.WriteLine("[.NET] Failed to create WebGPU instance");
                 return false;
             }
+            Console.WriteLine("[.NET] WebGPU instance created");
 
             // Create surface from SDL window first (needed for adapter request)
+            Console.WriteLine("[.NET] Creating surface from window...");
             _surface = CreateSurfaceFromWindow();
             if (_surface == null)
             {
-                Console.WriteLine("Failed to create WebGPU surface");
+                Console.WriteLine("[.NET] Failed to create WebGPU surface");
                 return false;
             }
+            Console.WriteLine("[.NET] Surface created");
 
             // Request adapter
+            Console.WriteLine("[.NET] Requesting adapter (async)...");
             var adapterOptions = new RequestAdapterOptions
             {
                 PowerPreference = PowerPreference.HighPerformance,
@@ -136,29 +152,37 @@ public static class Program
             };
 
             _adapter = await _instance.RequestAdapterAsync(adapterOptions);
+            Console.WriteLine("[.NET] RequestAdapterAsync returned");
             if (_adapter == null)
             {
-                Console.WriteLine("Failed to get WebGPU adapter");
+                Console.WriteLine("[.NET] Failed to get WebGPU adapter");
                 return false;
             }
+            Console.WriteLine("[.NET] Adapter obtained");
 
             // Request device
+            Console.WriteLine("[.NET] Requesting device (async)...");
             var deviceDescriptor = new DeviceDescriptor
             {
                 Label = "Main Device"
             };
 
             _device = await _adapter.RequestDeviceAsync(deviceDescriptor);
+            Console.WriteLine("[.NET] RequestDeviceAsync returned");
             if (_device == null)
             {
-                Console.WriteLine("Failed to get WebGPU device");
+                Console.WriteLine("[.NET] Failed to get WebGPU device");
                 return false;
             }
+            Console.WriteLine("[.NET] Device obtained");
 
             // Get queue
+            Console.WriteLine("[.NET] Getting queue...");
             _queue = _device.GetQueue();
+            Console.WriteLine("[.NET] Queue obtained");
 
             // Configure surface
+            Console.WriteLine("[.NET] Configuring surface...");
             var surfaceConfig = new SurfaceConfiguration
             {
                 Device = _device,
@@ -170,12 +194,14 @@ public static class Program
             };
 
             _surface.Configure(surfaceConfig);
+            Console.WriteLine("[.NET] Surface configured");
 
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"WebGPU initialization error: {ex.Message}");
+            Console.WriteLine($"[.NET] WebGPU initialization error: {ex.Message}");
+            Console.WriteLine($"[.NET] Stack trace: {ex.StackTrace}");
             return false;
         }
     }

@@ -196,20 +196,35 @@
                 setStatus('Loading WebAssembly module...');
 
                 // Import the ES6 module (NativeAOT-LLVM with -sEXPORT_ES6=1 -sMODULARIZE=1)
+                console.log('[JS] Importing WASM module...');
                 const { default: Module } = await import('./DotNetWasmDemo.js');
+                console.log('[JS] WASM module imported, calling Module()...');
 
                 // Initialize the module with canvas configuration
-                const module = await Module({
+                // NOTE: Don't await Module() - emscripten_set_main_loop with simulate_infinite_loop=1
+                // never returns, so the Promise never resolves. This is expected behavior.
+                Module({
                     canvas: document.getElementById('canvas'),
                     print: (text) => console.log(text),
                     printErr: (text) => console.error(text),
                     onRuntimeInitialized: () => {
-                        console.log('WASM runtime initialized');
+                        console.log('[JS] onRuntimeInitialized callback fired');
+                        setStatus('Application running');
+                    },
+                    onAbort: (what) => {
+                        console.error('[JS] Module aborted:', what);
+                        setStatus(`Aborted: ${what}`, true);
+                    }
+                }).catch(err => {
+                    // This catch handles the "unwind" exception that emscripten_set_main_loop throws
+                    // It's expected behavior, not an error
+                    if (err !== 'unwind') {
+                        console.error('[JS] Module error:', err);
+                        setStatus(`Error: ${err}`, true);
                     }
                 });
 
-                console.log('WASM module loaded and initialized');
-                setStatus('Application running');
+                console.log('[JS] Module() called (not awaiting - main loop takes over)');
 
             } catch (error) {
                 console.error('Failed to initialize:', error);
