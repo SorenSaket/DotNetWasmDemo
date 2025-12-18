@@ -120,7 +120,7 @@
 
     <div id="console"></div>
 
-    <script>
+    <script type="module">
         // Console output capture
         const consoleDiv = document.getElementById('console');
         const maxLogLines = 100;
@@ -195,23 +195,21 @@
 
                 setStatus('Loading WebAssembly module...');
 
-                // For NativeAOT-LLVM output, the WASM is loaded via the generated JS file
-                // The output from NativeAOT-LLVM is typically DotNetWasmDemo.js and DotNetWasmDemo.wasm
-                const script = document.createElement('script');
-                script.src = 'DotNetWasmDemo.js';
-                script.async = true;
+                // Import the ES6 module (NativeAOT-LLVM with -sEXPORT_ES6=1 -sMODULARIZE=1)
+                const { default: Module } = await import('./DotNetWasmDemo.js');
 
-                script.onload = function() {
-                    console.log('WASM module script loaded');
-                    setStatus('Application running');
-                };
+                // Initialize the module with canvas configuration
+                const module = await Module({
+                    canvas: document.getElementById('canvas'),
+                    print: (text) => console.log(text),
+                    printErr: (text) => console.error(text),
+                    onRuntimeInitialized: () => {
+                        console.log('WASM runtime initialized');
+                    }
+                });
 
-                script.onerror = function(e) {
-                    console.error('Failed to load WASM module:', e);
-                    setStatus('Error: Failed to load WASM module', true);
-                };
-
-                document.body.appendChild(script);
+                console.log('WASM module loaded and initialized');
+                setStatus('Application running');
 
             } catch (error) {
                 console.error('Failed to initialize:', error);
